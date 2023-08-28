@@ -23,7 +23,7 @@ def is_sheet_empty(sheet):
 def get_row(filename, header_row):
 
     global name, input_col
-    backnames = ['专网地址', '专网IP', '专网ip', '外网IP']
+    backnames = ['IP地址', '专网IP','ip地址']
     for back_name in backnames:
         try:
             col = header_row.index(back_name)
@@ -48,7 +48,7 @@ def get_ip_row_in_sheet(filename, sheet):
     if is_sheet_empty(sheet):
         return -1
     global name, input_col
-    backnames = ['专网地址', '专网IP', '专网ip', '外网IP']
+    backnames = ['IP地址', '专网IP','ip地址']
     # 在前四行尝试寻找表头
     max_try_times = 5
     row_generator = sheet.iter_rows(values_only=True)
@@ -80,7 +80,7 @@ def read_xlsx(files=None):
             wb = load_workbook(fn, read_only=True)
         except PermissionError:
             input("文件被占用,无法读取,按任意键退出")
-            sys.exit(0)
+            sys.exit(1)
 
         for sheet in wb.worksheets:
             col_num = get_ip_row_in_sheet(os.path.basename(fn), sheet)
@@ -91,8 +91,8 @@ def read_xlsx(files=None):
                 if cell_value is not None:
                     try:
                         ip_address(cell_value)
-                        if ip_address(cell_value).is_private == False:
-                            data.append(cell_value)
+                        # if ip_address(cell_value).is_private == False:
+                        data.append(cell_value)
                     except ValueError:
                         pass
     data = list(set(data))  # 去重
@@ -105,6 +105,12 @@ def get_ip_list(xfile, result):
         for item in data:
             f.write(f"{item}\n")
 
+
+
+def count_lines(filename):
+    with open(filename, 'r') as file:
+        count = sum(1 for line in file if line.strip())
+    return count
 
 '''
 description: 
@@ -119,7 +125,7 @@ def call_ping(tool_path, xfile, result, timeout = 5000, size = 4):
             f.write('')
     path = os.path.abspath(tool_path)
     command = f'{path} /loadfile {xfile} /stab {result} /PingTimeout {timeout} /PingSize {size}'
-    print(f'ping:{xfile}为ip列表,结果存入{result}.超时{timeout}ms,{size}字节')
+    print(f'超时IP数{count_lines(xfile)}.')
     os.system(command)
 
 
@@ -159,7 +165,7 @@ def write_result(file_list, ip_file, is_in, not_in):
             wb = load_workbook(fn)
         except PermissionError:
             input("文件被占用,无法读取,按任意键退出")
-            sys.exit(0)
+            sys.exit(1)
 
         for sheet in wb.worksheets:
             col_num = get_ip_row_in_sheet(os.path.basename(fn), sheet)
@@ -178,13 +184,13 @@ def write_result(file_list, ip_file, is_in, not_in):
                     ip_address(cell_value)
                 except ValueError:
                     continue
-                if ip_address(cell_value).is_private == False:
-                    if cell_value in ip_list:
-                        sheet.cell(row=row, column=new_col).value = is_in
-                    else:
-                        sheet.cell(row=row, column=new_col).value = not_in
+                #if ip_address(cell_value).is_private == False:
+                if cell_value in ip_list:
+                    sheet.cell(row=row, column=new_col).value = is_in
                 else:
-                    sheet.cell(row=row, column=new_col).value = ''
+                    sheet.cell(row=row, column=new_col).value = not_in
+                #else:
+                #    sheet.cell(row=row, column=new_col).value = ''
         wb.save(fn)
 
 
@@ -209,13 +215,13 @@ def ip_xlsx_test(file_list, ping_timeout, ping_size, times):
     with open(ip_list_name, 'r') as file1, open(bad_name, 'w') as file2:
         file2.write(file1.read())
     # ping重复操作
+    print(f'ping设置:超时{ping_timeout}ms,{ping_size}字节')
     while(times > 0):
         call_ping(ping_relative_path, bad_name, result_name, ping_timeout, ping_size)
         get_bad_ip(result_name, bad_name)
 
         times = times - 1
-        sys.stdout.write(f'\r 剩余{times}次')
-        sys.stdout.flush()
+        print(f'剩余{times}次,',end='')
     # 结果回写
     write_result(file_list, bad_name, "请求超时", "成功完成")
     input("操作完成,按任意键退出.")
@@ -238,3 +244,4 @@ ping_size = 4
 print(os.getcwd())
 file_list = [f for f in os.listdir() if f.endswith('.xlsx')]
 ip_xlsx_test(file_list, ping_timeout, ping_size, ping_times)
+sys.exit(0)
