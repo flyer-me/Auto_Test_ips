@@ -1,5 +1,5 @@
-# auto_ping_ips_in_excel
-auto ping ips in excel(s) and write back.
+# auto_test_ips_in_excel
+auto test ips in excel(s) and write back.
 
 自动使用ping测试位于Excel文件中的IP地址，并将连通性结果写回Excel文件.
 由于项目历史遗留,Excel文件中IP地址表头需为以下中的一个：
