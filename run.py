@@ -90,7 +90,7 @@ param {*} xfile
 param {*} result
 return {*}
 '''
-def call_ping(tool_path, xfile, result, timeout = 5000, size = 4):
+def call_ping(tool_path, xfile, result, timeout = 1000, size = 4):
     if not os.path.exists(result):
         with open(result, 'w') as f:
             f.write('')
