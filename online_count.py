@@ -13,10 +13,8 @@ for file_name in file_list:
     for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=2, max_col=4, values_only=True):
         category, status = str(row[0]).split('/')[-1], row[2]    # 所选区域-->小区名称，设备状态
         if category not in result:
-            result[category] = "全部离线"
+            result[category] = 0
         if status == '在线':
-            if result.get(category, 0) == "全部离线":
-                result[category] = 0
             result[category] = result.get(category, 0) + 1
 # 从"小区统计表1775.xlsx"
 file = load_workbook("小区统计表1775.xlsx",data_only=True,read_only=False)
