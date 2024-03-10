@@ -4,31 +4,14 @@ import os
 import sys
 from datetime import datetime
 from ipaddress import ip_address
-
 from chardet import detect
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
-
 import configparser
 
-
-
-'''
-description: 
-param {*} filename
-param {*} header_row
-return {*}
-'''
 def is_sheet_empty(sheet):
     return sheet.max_row == 1 and sheet.max_column == 1
 
-
-'''
-description: 
-param {*} filename
-param {*} sheet
-return {*}
-'''
 def get_ip_row_in_sheet(filename, sheet):
     if is_sheet_empty(sheet):
         return -1
@@ -44,12 +27,6 @@ def get_ip_row_in_sheet(filename, sheet):
                 return header_row.index(back_name)
     return -1
 
-
-'''
-description: 
-param {*} files
-return {*}
-'''
 def read_xlsx(files=None):
     data = []
     for fn in files:
@@ -83,13 +60,6 @@ def count_lines(filename):
         count = sum(1 for line in file if line.strip())
     return count
 
-'''
-description: 
-param {*} tool_path
-param {*} xfile
-param {*} result
-return {*}
-'''
 def call_ping(tool_path, xfile, result, timeout = 1000, size = 4):
     if not os.path.exists(result):
         with open(result, 'w') as f:
@@ -107,13 +77,6 @@ def get_encoding(file):
             data = f.read()
             return detect(data)['encoding']
 
-
-'''
-description: 
-param {*} ip_list
-param {*} bad_ip_list
-return {*}
-'''
 def get_bad_ip(ip_list, bad_ip_list):
     with open(ip_list, 'r', encoding=get_encoding(ip_list)) as f:
         lines = f.readlines()
@@ -123,12 +86,8 @@ def get_bad_ip(ip_list, bad_ip_list):
             if parts[1] == '0':
                 f.write(parts[0] + '\n')
 
-
 '''
 description: 
-param {*} file_list
-param {*} bad_ip
-return {*}
     规则: 在线统计结果放置于表格右侧空白一列
 '''
 def write_result(file_list, ip_file, is_in, not_in):
